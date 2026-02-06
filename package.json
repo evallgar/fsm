@@ -1,0 +1,90 @@
+{
+  "name": "fsm",
+  "version": "1.0.11",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "android:prod": "eas build -p android --profile production"
+  },
+  "dependencies": {
+    "@expo-google-fonts/manrope": "^0.4.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-firebase/app": "^22.4.0",
+    "@react-native-firebase/auth": "^22.4.0",
+    "@react-native-firebase/storage": "^22.4.0",
+    "@react-native/virtualized-lists": "0.79.5",
+    "@react-navigation/bottom-tabs": "^7.3.10",
+    "@react-navigation/elements": "^2.5.2",
+    "@react-navigation/native": "^7.1.6",
+    "@tabler/icons-react-native": "^3.34.1",
+    "@tanstack/react-query": "^5.83.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "expo": "^54.0.0",
+    "expo-battery": "~10.0.8",
+    "expo-build-properties": "~1.0.10",
+    "expo-constants": "~18.0.13",
+    "expo-dev-client": "~6.0.20",
+    "expo-device": "~8.0.10",
+    "expo-image": "~3.0.11",
+    "expo-image-picker": "~17.0.10",
+    "expo-linking": "~8.0.11",
+    "expo-localization": "~17.0.8",
+    "expo-location": "~19.0.8",
+    "expo-notifications": "~0.32.16",
+    "expo-router": "~6.0.23",
+    "expo-secure-store": "~15.0.8",
+    "expo-status-bar": "~3.0.9",
+    "firebase": "^12.9.0",
+    "firebase-tools": "^14.11.0",
+    "i18next": "^25.3.2",
+    "nativewind": "^4.1.23",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.5.14",
+    "react": "19.1.0",
+    "react-i18next": "^15.6.0",
+    "react-native": "0.81.5",
+    "react-native-blob-util": "^0.19.8",
+    "react-native-calendars": "^1.1313.0",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-localize": "^3.5.1",
+    "react-native-maps": "1.20.1",
+    "react-native-reanimated": "~4.1.1",
+    "react-native-render-html": "^6.3.4",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-signature-canvas": "^5.0.1",
+    "react-native-svg": "15.12.1",
+    "react-native-webview": "13.15.0",
+    "react-native-worklets": "0.5.1",
+    "shadcn-ui": "^0.9.5",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/react": "~19.1.10",
+    "lightningcss": "^1.30.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.9.2"
+  },
+  "overrides": {
+    "picomatch": "4.0.3"
+  },
+  "resolutions": {
+    "picomatch": "4.0.3",
+    "@react-native-async-storage/async-storage": "1.24.0"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
+    }
+  },
+  "private": true
+}
