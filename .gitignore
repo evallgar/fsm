@@ -43,3 +43,6 @@ sensa-cmms-firebase-adminsdk-hbldk-8f1856f61e.json
 /android
 google-services.json
 GoogleService-Info.plist
+
+#NPM
+.npmrc
