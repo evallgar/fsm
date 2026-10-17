@@ -6,6 +6,8 @@ import LoadingButton from "@/components/loading-button";
 import { useTranslation } from "react-i18next";
 import { IconEye, IconEyeOff } from "@tabler/icons-react-native";
 import { useToast } from "@/components/Toast";
+import LegalSheet, { LegalKind } from "@/components/LegalSheet";
+import ForgotPasswordSheet from "@/components/ForgotPasswordSheet";
 
 /**
  * SignIn component handles user authentication through email and password
@@ -21,6 +23,8 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [legal, setLegal] = useState<LegalKind | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
   const { signIn } = useSession();
   const { toast } = useToast();
 
@@ -125,6 +129,15 @@ export default function SignIn() {
                 <IconEye size={20} color="#6b7280" />}
             </Pressable>
           </View>
+          {/* Reset password, as in the webapp */}
+          <Pressable
+            onPress={() => (Platform.OS === "ios" ? setForgotOpen(true) : null)}
+            onPressOut={() => (Platform.OS === "android" ? setForgotOpen(true) : null)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            className="mt-2 self-end"
+          >
+            <Text className="text-sm font-manrope-medium text-muted-foreground">{t("web_loginReset")}</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -134,6 +147,29 @@ export default function SignIn() {
         onPress={handleSignInPress} 
         loading={isSigningIn} 
       />
+
+      {/* Terms and privacy: each opens a full-height sheet with the same text as the webapp */}
+      <Text className="mt-6 max-w-[300px] text-center text-xs text-muted-foreground leading-5">
+        {t("web_termsAcceptanceParagraph")}{" "}
+        <Text
+          className="underline text-primary"
+          onPress={() => setLegal("terms")}
+          suppressHighlighting
+        >
+          {t("web_proTermsConditions")}
+        </Text>{" "}
+        {t("web_sharedAnd")}{" "}
+        <Text
+          className="underline text-primary"
+          onPress={() => setLegal("privacy")}
+          suppressHighlighting
+        >
+          {t("web_proPrivacy")}
+        </Text>
+        .
+      </Text>
+      <LegalSheet kind={legal} onClose={() => setLegal(null)} />
+      <ForgotPasswordSheet visible={forgotOpen} onClose={() => setForgotOpen(false)} initialEmail={email} />
 
       {/* Sign Up Link */}
       {/* <View className="flex-row items-center mt-6">

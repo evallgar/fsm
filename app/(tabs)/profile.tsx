@@ -35,10 +35,14 @@ import {
   IconX,
   IconEye,
   IconEyeOff,
+  IconFileText,
+  IconMapPin,
+  IconShieldLock,
 } from "@tabler/icons-react-native";
 import ThemedIcon from "@/components/ThemedIcon";
 import { useTheme } from "@react-navigation/native";
 import { changePassword } from "@/lib/onemap-api";
+import LegalSheet, { LegalKind } from "@/components/LegalSheet";
 
 interface SectionItem {
   id: string;
@@ -74,6 +78,7 @@ const Profile = () => {
   
   // Password change modal state
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [legal, setLegal] = useState<LegalKind | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -251,12 +256,35 @@ const Profile = () => {
           ),
         },
         {
+          id: "tracking",
+          title: t("trackingTitle"),
+          icon: IconMapPin,
+          action: () => router.push("/tracking"),
+        },
+        {
           id: "notifications",
           title: t("Notifications"),
           icon: IconBell,
           toggle: true,
           toggleValue: notificationsEnabled,
           onToggleChange: handleNotificationToggle,
+        },
+      ],
+    },
+    {
+      title: t("legalLinks"),
+      data: [
+        {
+          id: "terms",
+          title: t("web_proTermsConditions"),
+          icon: IconFileText,
+          action: () => setLegal("terms"),
+        },
+        {
+          id: "privacy",
+          title: t("web_proPrivacy"),
+          icon: IconShieldLock,
+          action: () => setLegal("privacy"),
         },
       ],
     },
@@ -465,6 +493,7 @@ const Profile = () => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      <LegalSheet kind={legal} onClose={() => setLegal(null)} />
     </SafeAreaView>
   );
 };

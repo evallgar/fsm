@@ -178,6 +178,20 @@ export async function logout(): Promise<void> {
   }
 }
 
+/**
+ * Asks the server to email a password reset link (the same call the webapp's "Reset password" makes). The link in the
+ * email opens the webapp, where the new password is chosen. The server answers the same whether or not the email is
+ * registered, so nothing here reveals which ones are.
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const response = await fetch(`${ONEMAP_URL}/api/password/reset`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+    body: form({ email: email.trim() }),
+  });
+  if (!response.ok) await fail(response);
+}
+
 /** Changes the engineer's own password: the user is read again and saved with the new one. */
 export async function changePassword(user: OneMapUser, newPassword: string): Promise<void> {
   const fresh = await request<OneMapUser>("GET", `/users/${user.id}`);
