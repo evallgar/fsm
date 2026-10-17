@@ -80,6 +80,9 @@
         {
           "ios": {
             "useFrameworks": "static"
+          },
+          "android": {
+            "compileSdkVersion": 37
           }
         }
       ],
