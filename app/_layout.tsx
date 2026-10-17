@@ -24,6 +24,7 @@ import ThemedIcon from "@/components/ThemedIcon";
 import { IconX } from "@tabler/icons-react-native";
 import { Platform } from "react-native";
 import { useEffect } from "react";
+import { restoreTracking } from "@/lib/tracking";
 import { initializeI18nAndDateFns } from "@/lib/i18n-init";
 import { ToastProvider } from "@/components/Toast";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -180,7 +181,7 @@ const InitialLayout = () => {
         name="(modal)/register-location/[id]"
         options={{
           presentation: Platform.OS === "ios" ? "formSheet" : "containedModal",
-          sheetAllowedDetents: [0.45, 0.95],
+          sheetAllowedDetents: [0.65, 0.95],
           sheetInitialDetentIndex: 0,
           sheetGrabberVisible: true,
           headerLeft: () => (
@@ -225,6 +226,18 @@ const InitialLayout = () => {
           },
         }}
       />
+      <Stack.Screen
+        name="tracking"
+        options={{
+          headerShown: true,
+          headerTitle: t("trackingTitle"),
+          headerLargeTitle: false,
+          headerBackButtonDisplayMode: "default",
+          headerBackTitle: t("back"),
+          headerTitleStyle: { fontFamily: "manrope-semibold" },
+          headerBackTitleStyle: { fontFamily: "manrope-medium" },
+        }}
+      />
       <Stack.Screen name="signin" options={{ headerShown: false }} />
     </StyledStack>
   );
@@ -243,6 +256,8 @@ const RootLayout = () => {
   // Initialize i18n and date-fns locale on app startup
   useEffect(() => {
     initializeI18nAndDateFns();
+    // bring the position tracker back as the engineer left it (it needs no sign-in: it reports as its device id)
+    restoreTracking().catch((e) => console.log("[tracking] restore failed:", e));
   }, []);
 
   if (!fontsLoaded) {

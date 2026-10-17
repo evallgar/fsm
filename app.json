@@ -24,7 +24,13 @@
               "NSIncludesSubdomains": true
             }
           }
-        }
+        },
+        "NSLocationWhenInUseUsageDescription": "Field Service Manager uses your location to register check-ins and check-outs.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Field Service Manager to use your location, also in the background, to report your position while you work.",
+        "NSMotionUsageDescription": "Motion detection lets the app pause location updates while you are stationary and save battery.",
+        "UIBackgroundModes": [
+          "location"
+        ]
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -55,6 +61,7 @@
     "plugins": [
       "expo-router",
       "expo-localization",
+      "./plugins/with-traccar",
       [
         "expo-image-picker",
         {
