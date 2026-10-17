@@ -307,6 +307,7 @@
     "sharedDecimalDegrees": "Grados",
     "sharedDegreesDecimalMinutes": "Minutos",
     "sharedDegreesMinutesSeconds": "Segundos",
+    "ticketNumber": "Número",
     "sharedName": "Nombre",
     "sharedDescription": "Descripción",
     "sharedSearch": "Buscar",
@@ -896,5 +897,8 @@
     "writeYourResultsHere": "Escribe tus resultados aquí",
     "writeYourFindingsHere": "Escribe tus hallazgos aquí",
     "noimagesaddedyet": "No hay imágenes agregadas",
-    "unitPlaceholder": "mts, lts, kgs, etc."
+    "unitPlaceholder": "mts, lts, kgs, etc.",
+    "writeYourCauseHere": "Escribe la causa de la falla aquí",
+    "findingsFault": "Falla / servicio",
+    "findingsCause": "Causa"
 }

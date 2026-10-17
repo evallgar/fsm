@@ -38,7 +38,7 @@ import {
 } from "@tabler/icons-react-native";
 import ThemedIcon from "@/components/ThemedIcon";
 import { useTheme } from "@react-navigation/native";
-import { changePassword } from "@/lib/firebase-service";
+import { changePassword } from "@/lib/onemap-api";
 
 interface SectionItem {
   id: string;
@@ -159,15 +159,9 @@ const Profile = () => {
         [{ text: "OK" }]
       );
     } catch (error: any) {
-      // Handle Firebase errors
+      // The server says why it refused (a password that is too short, a read-only account...)
       console.error("Password change error:", error);
-      
-      // Check for specific Firebase error codes
-      if (error.code === "auth/requires-recent-login") {
-        setPasswordError(t("ReauthenticationRequired"));
-      } else {
-        setPasswordError(error.message || t("PasswordChangeError"));
-      }
+      setPasswordError(error.message || t("PasswordChangeError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -194,7 +188,7 @@ const Profile = () => {
   // ============================================================================
   // Computed Values
   // ============================================================================
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest";
+  const displayName = user?.name || user?.email?.split("@")[0] || "Guest";
 
   // ============================================================================
   // Section Definitions
@@ -295,7 +289,7 @@ const Profile = () => {
             <View className="relative">
               <View className="w-20 h-20 rounded-full bg-muted overflow-hidden border-2 border-primary">
                 <Image 
-                  source={{ uri: user?.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) }} 
+                  source={{ uri: user?.attributes?.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) }} 
                   className="w-full h-full"
                 />
               </View>

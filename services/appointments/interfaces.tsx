@@ -58,7 +58,10 @@ export interface Material {
 export interface Findings {
     images: string[];
     measurements: any[];
+    /** the fault or service found */
     notes: string;
+    /** what caused it (printed in the service sheet) */
+    cause?: string;
 }
 
 export enum WorkOrderStatus {
@@ -86,6 +89,8 @@ export interface FirestoreTimestamp {
 export interface WorkOrder {
     // Base fields
     id: string;
+    /** the number people use for it: the customer's ticket prefix and the ticket id ("WO-1042") */
+    number?: string;
     agentId: string[];
     branchId: string;
     entityId: string;
@@ -132,7 +137,9 @@ export interface WorkOrder {
     // Type information
     eventType: string;
     type: string;
+    /** id of one of the priorities of the customer (the Helpdesk ones) */
     priority: string;
+    priorityName?: string;
     
     // Findings and results
     findings?: Findings;

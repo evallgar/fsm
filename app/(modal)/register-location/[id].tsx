@@ -6,7 +6,7 @@ import { Button } from "@/components/Button";
 import useLocation from "@/hooks/useLocation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getAuth } from "firebase/auth";
+import { getCurrentUser } from "@/lib/onemap-api";
 import { usePostLocationMutation } from "@/services/osmand/api";
 
 export default function RegisterLocation() {
@@ -35,8 +35,7 @@ export default function RegisterLocation() {
       }
       
       // Get current user ID
-      const auth = getAuth();
-      const userId = auth.currentUser?.uid;
+      const userId = getCurrentUser()?.id;
       
       if (!userId) {
         setError("User not authenticated");
@@ -45,7 +44,7 @@ export default function RegisterLocation() {
       
       // Post location to OsmAnd server
       await postLocation({
-        id: userId,
+        id: String(userId),
         lat: locationData.coords.latitude,
         lon: locationData.coords.longitude,
         altitude: locationData.coords.altitude || undefined,

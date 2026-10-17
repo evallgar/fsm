@@ -1,4 +1,4 @@
-import { getAuth } from "firebase/auth";
+import { getCurrentUser } from "@/lib/onemap-api";
 import { useMutation } from "@tanstack/react-query";
 import * as Battery from 'expo-battery';
 
@@ -14,7 +14,7 @@ const DEBUG_NETWORK = true;
  * Based on https://www.traccar.org/osmand/
  */
 export interface OsmAndLocationPayload {
-  id: string;         // Device identifier (using Firebase auth user ID)
+  id: string;         // Device identifier (the platform user id of the engineer)
   lat: number;        // Latitude
   lon: number;        // Longitude
   timestamp?: number; // Unix timestamp in seconds (optional, server can use current time)
@@ -36,14 +36,13 @@ export interface OsmAndLocationPayload {
  * @returns Promise with the response
  */
 export const postOsmAndLocation = async (payload: OsmAndLocationPayload): Promise<Response> => {
-  // If no ID is provided, use the current user's ID from Firebase Auth
+  // If no ID is provided, use the signed-in engineer's platform user id
   if (!payload.id) {
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
+    const currentUser = getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    payload.id = currentUser.uid;
+    payload.id = String(currentUser.id);
   }
 
   // Get battery information using async methods instead of hooks

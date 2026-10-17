@@ -2,16 +2,15 @@ import { useMutation } from "@tanstack/react-query";
 import { WorkOrder } from "./interfaces";
 import { appointments } from "@/services/appointments/api";
 
+/**
+ * Saves a work order. The server's refusal (a status the workflow does not allow, an unknown assignee...) is thrown,
+ * so the screen that asked can show it instead of believing the save worked.
+ */
 export function useUpdateAppointmentMutation() {
   return useMutation({
     mutationFn: async (appointment: WorkOrder) => {
-      try {
-        await appointments.update(appointment.id, appointment);
-        return appointment;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        return null;
-      }
+      await appointments.update(appointment.id, appointment);
+      return appointment;
     },
   });
 }

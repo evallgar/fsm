@@ -16,7 +16,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.apps.companion.fsm",
-      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSExceptionDomains": {
@@ -32,7 +31,6 @@
       }
     },
     "android": {
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -57,8 +55,6 @@
     "plugins": [
       "expo-router",
       "expo-localization",
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
       [
         "expo-image-picker",
         {

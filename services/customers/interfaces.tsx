@@ -1,6 +1,7 @@
-import { GeoPoint, Timestamp } from "firebase/firestore";
+import { GeoPoint, Timestamp } from "firebase/firestore"; // types only: the data comes from the OneMap server
 
 export interface Customer {
+    id: string;
     active: boolean;
     address: {
         city: string;
