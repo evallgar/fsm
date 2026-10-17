@@ -115,15 +115,8 @@ const AppointmentDetails = () => {
 
       // If signature is provided, save it
       if (signature && signature !== "pending") {
-        // Create a unique path for this appointment's signature
-        const storagePath = `appointments/${id}`;
-
-        // Upload signature image to Firebase Storage using the existing service
-        signatureUrl = await storageService.uploadSignatureToFirebase3(
-          actualSignature,
-          storagePath,
-          `${id}.png`
-        );
+        // The signature is attached to the work order (a ticket) on the server
+        signatureUrl = await storageService.uploadSignature(id, actualSignature);
         console.log("Signature uploaded successfully:", signatureUrl);
       }
 
@@ -303,6 +296,12 @@ const AppointmentDetails = () => {
       title: "sharedInfoTitle",
       data: [
         {
+          id: "0",
+          title: "ticketNumber",
+          icon: TablerIcons.IconHash,
+          value: data?.number || data?.id,
+        },
+        {
           id: "1",
           title: "sharedName",
           icon: TablerIcons.IconFileCheck,
@@ -328,7 +327,7 @@ const AppointmentDetails = () => {
           id: "23",
           title: "Priority",
           icon: TablerIcons.IconAlertCircle,
-          value: data?.priority,
+          value: data?.priorityName || data?.priority,
         },
       ],
     },
@@ -412,7 +411,8 @@ const AppointmentDetails = () => {
         {
           id: "7",
           title: "Procedures",
-          link: `/(actions)/procedures/${data?.equipmentId}`,
+          // procedures belong to the equipment: without one there is nothing to open
+          link: data?.equipmentId ? `/(actions)/procedures/${data.equipmentId}` : undefined,
         },
         {
           id: "8",

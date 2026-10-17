@@ -306,6 +306,7 @@
     "sharedDecimalDegrees": "Decimal Degrees",
     "sharedDegreesDecimalMinutes": "Degrees Decimal Minutes",
     "sharedDegreesMinutesSeconds": "Degrees Minutes Seconds",
+    "ticketNumber": "Number",
     "sharedName": "Name",
     "sharedDescription": "Description",
     "sharedSearch": "Search",
@@ -904,5 +905,8 @@
     "writeYourResultsHere": "Write your results here",
     "writeYourFindingsHere": "Write your findings here",
     "noimagesaddedyet": "No images added yet",
-    "unitPlaceholder": "mts, lts, kgs, etc."
+    "unitPlaceholder": "mts, lts, kgs, etc.",
+    "writeYourCauseHere": "Write the cause of the fault here",
+    "findingsFault": "Fault / service",
+    "findingsCause": "Cause"
 }

@@ -23,6 +23,7 @@ import { ImagePickerAsset } from "expo-image-picker";
 import { IconCamera, IconTrash, IconPlus, IconX } from "@tabler/icons-react-native";
 import ThemedIcon from "@/components/ThemedIcon";
 import { storageService } from "@/services/storage/api";
+import { imageSource } from "@/lib/onemap-api";
 import { WorkOrder } from "@/services/appointments/interfaces";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppointmentByIdQueryOptions } from "@/services/appointments/queries";
@@ -51,7 +52,7 @@ export default function WorkOrderResults() {
     if (isFetched) {
       const uploadedImages = appointment?.results?.images || [];
       uploadedImages.map(async (image) => {
-        const asset = await ImageExpoComponent.loadAsync(image);
+        const asset = await ImageExpoComponent.loadAsync(imageSource(image));
         const imageAsset: ImagePickerAsset = {
           uri: image,
           width: asset.width,
@@ -149,14 +150,11 @@ export default function WorkOrderResults() {
       // Show loading indicator
       setIsSaving(true);
       
-      // 1. Upload all images to Firebase Storage
+      // 1. Attach the photos to the work order on the server
       let imageUrls: string[] = [];
       if (images.length > 0) {
-        // Create a unique path for this result's images
-        const storagePath = `results/${id}`;
-        
-        // Upload all images at once and get their download URLs
-        imageUrls = await storageService.uploadMultipleImages(images, storagePath);
+        // Attach the photos to the work order (scaled down first); the ones already attached stay as they are
+        imageUrls = await storageService.uploadTicketImages(id, images, "result");
       }
       
       // 2. Update appointment with results
@@ -261,7 +259,7 @@ export default function WorkOrderResults() {
                         activeOpacity={0.9}
                       >
                         <Image 
-                          source={{ uri: item.uri }} 
+                          source={imageSource(item.uri)} 
                           className="w-[200px] h-[150px]" 
                         />
                       </TouchableOpacity>
@@ -352,7 +350,7 @@ export default function WorkOrderResults() {
                   } : undefined}
                 >
                   <Image
-                    source={{ uri: fullscreenImage }}
+                    source={imageSource(fullscreenImage)}
                     style={{
                       width: screenWidth,
                       height: screenHeight * 0.8,

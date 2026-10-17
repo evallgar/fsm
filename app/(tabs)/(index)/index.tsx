@@ -312,6 +312,9 @@ const Index = () => {
 
                               {/* Value & Title in the middle, start aligned */}
                               <View className="flex-col flex-1 ml-2">
+                                {!!item.number && (
+                                  <Text className="text-muted-foreground text-xs font-manrope-regular">{item.number}</Text>
+                                )}
                                 <Text className="text-primary font-manrope-regular">
                                   {item.customerName || item.title}
                                 </Text>
@@ -355,9 +358,9 @@ const Index = () => {
                                         : "secondary"
                                     }
                                   />
-                                  {item.priority && (
+                                  {item.priorityName && (
                                     <Badge
-                                      label={t(item.priority)}
+                                      label={item.priorityName}
                                       variant="destructive"
                                       className="ml-2"
                                     />
@@ -436,6 +439,9 @@ const Index = () => {
 
                               {/* Value & Title in the middle, start aligned */}
                               <View className="flex-col flex-1 ml-2">
+                                {!!item.number && (
+                                  <Text className="text-muted-foreground text-xs font-manrope-regular">{item.number}</Text>
+                                )}
                                 <Text className="text-primary font-manrope-regular">
                                   {item.customerName || item.title}
                                 </Text>
@@ -473,9 +479,9 @@ const Index = () => {
                                         : "secondary"
                                     }
                                   />
-                                  {item.priority && (
+                                  {item.priorityName && (
                                     <Badge
-                                      label={t(item.priority)}
+                                      label={item.priorityName}
                                       variant="destructive"
                                       className="ml-2"
                                     />

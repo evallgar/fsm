@@ -40,14 +40,8 @@ export default function SignIn() {
       // Get error message to display in toast
       let errorMessage = t("signin-error");
       if (err instanceof Error) {
-        // Check for specific Firebase auth error codes
-        if (err.message.includes("auth/user-not-found") || err.message.includes("auth/wrong-password")) {
-          errorMessage = t("invalid-credentials");
-        } else if (err.message.includes("auth/too-many-requests")) {
-          errorMessage = t("too-many-attempts");
-        } else if (err.message.includes("auth/invalid-email")) {
-          errorMessage = t("invalid-email");
-        } else if (err.message.includes("auth/network-request-failed")) {
+        // signIn reports the server's refusals itself; this only catches what escapes it
+        if (/network request failed/i.test(err.message)) {
           errorMessage = t("network-error");
         }
       }

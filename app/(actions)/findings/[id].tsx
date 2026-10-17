@@ -24,6 +24,7 @@ import { ImagePickerAsset } from "expo-image-picker";
 import { IconCamera, IconTrash, IconPlus, IconX } from "@tabler/icons-react-native";
 import ThemedIcon from "@/components/ThemedIcon";
 import { storageService } from "@/services/storage/api";
+import { imageSource } from "@/lib/onemap-api";
 import { WorkOrder } from "@/services/appointments/interfaces";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppointmentByIdQueryOptions } from "@/services/appointments/queries";
@@ -42,6 +43,7 @@ export default function WorkOrderFindings() {
 
   // State for notes and images
   const [notes, setNotes] = useState("");
+  const [cause, setCause] = useState("");
   const [images, setImages] = useState<ImagePickerAsset[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export default function WorkOrderFindings() {
     if (isFetched) {
       const uploadedImages = appointment?.findings?.images || [];
       uploadedImages.map(async (image) => {
-        const asset = await ImageExpoComponent.loadAsync(image);
+        const asset = await ImageExpoComponent.loadAsync(imageSource(image));
         const imageAsset: ImagePickerAsset = {
           uri: image,
           width: asset.width,
@@ -64,6 +66,7 @@ export default function WorkOrderFindings() {
       });
       const uploadedNotes = appointment?.findings?.notes || "";
       setNotes(uploadedNotes);
+      setCause(appointment?.findings?.cause || "");
     }
   }, [isFetched]);
 
@@ -150,14 +153,11 @@ export default function WorkOrderFindings() {
       // Show loading indicator
       setIsSaving(true);
       
-      // 1. Upload all images to Firebase Storage
+      // 1. Attach the photos to the work order on the server
       let imageUrls: string[] = [];
       if (images.length > 0) {
-        // Create a unique path for this finding's images
-        const storagePath = `findings/${id}`;
-        
-        // Upload all images at once and get their download URLs
-        imageUrls = await storageService.uploadMultipleImages(images, storagePath);
+        // Attach the photos to the work order (scaled down first); the ones already attached stay as they are
+        imageUrls = await storageService.uploadTicketImages(id, images, "finding");
       }
       
       // 2. Update appointment with findings
@@ -165,6 +165,7 @@ export default function WorkOrderFindings() {
         ...appointment,
         findings: {
           notes,
+          cause,
           images: imageUrls,
           measurements: appointment.findings?.measurements || [],
         },
@@ -206,8 +207,11 @@ export default function WorkOrderFindings() {
           }}
         >
           <View className="px-4">
-            {/* Notes input */}
-            <View className="mb-8 mt-4">
+            {/* Notes input: the fault or service */}
+            <Text className="text-xs font-manrope-regular uppercase text-muted-foreground mt-4 px-2">
+              {t("findingsFault")}
+            </Text>
+            <View className="mb-6 mt-2">
               <View className="rounded-xl border border-muted-foreground/20 bg-card overflow-hidden shadow-sm">
                 <TextInput
                   className="p-4 text-primary font-manrope-regular min-h-[120px]"
@@ -217,6 +221,24 @@ export default function WorkOrderFindings() {
                   textAlignVertical="top"
                   value={notes}
                   onChangeText={setNotes}
+                />
+              </View>
+            </View>
+
+            {/* Cause input */}
+            <Text className="text-xs font-manrope-regular uppercase text-muted-foreground px-2">
+              {t("findingsCause")}
+            </Text>
+            <View className="mb-8 mt-2">
+              <View className="rounded-xl border border-muted-foreground/20 bg-card overflow-hidden shadow-sm">
+                <TextInput
+                  className="p-4 text-primary font-manrope-regular min-h-[90px]"
+                  placeholder={t("writeYourCauseHere")}
+                  placeholderTextColor="#9ca3af"
+                  multiline
+                  textAlignVertical="top"
+                  value={cause}
+                  onChangeText={setCause}
                 />
               </View>
             </View>
@@ -262,7 +284,7 @@ export default function WorkOrderFindings() {
                         activeOpacity={0.9}
                       >
                         <Image 
-                          source={{ uri: item.uri }} 
+                          source={imageSource(item.uri)} 
                           className="w-[200px] h-[150px]" 
                         />
                       </TouchableOpacity>
@@ -353,7 +375,7 @@ export default function WorkOrderFindings() {
                   } : undefined}
                 >
                   <Image
-                    source={{ uri: fullscreenImage }}
+                    source={imageSource(fullscreenImage)}
                     style={{
                       width: screenWidth,
                       height: screenHeight * 0.8,
