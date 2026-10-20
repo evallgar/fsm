@@ -7,12 +7,16 @@ import {
   TextInput,
   Switch,
   ActivityIndicator,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   SafeAreaView,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { MIN_SIGNATURE_LENGTH, signatureLength } from "@/lib/signature";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useWorkOrderPoint } from "@/services/appointments/use-work-order-point";
 import { useAppointmentByIdQueryOptions } from "@/services/appointments/queries";
 import { Skeleton } from "@/components/Skeleton";
 import { useTranslation } from "react-i18next";
@@ -38,6 +42,8 @@ type Section = {
     value?: string | (() => string);
     link?: string | false;
     params?: Record<string, string>;
+    /** a tap runs this (and the row shows a pencil) instead of opening a screen */
+    action?: () => void;
   }[];
 };
 const AppointmentDetails = () => {
@@ -48,6 +54,9 @@ const AppointmentDetails = () => {
   ) as { data: Appointment; isFetching: boolean; isError: boolean };
 
   const { t } = useTranslation();
+  // the sheets reach the bottom of the screen, under the system navigation bar
+  const insets = useSafeAreaInsets();
+  const { point: workOrderPoint } = useWorkOrderPoint(data);
 
   // Status dialog state
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
@@ -55,8 +64,53 @@ const AppointmentDetails = () => {
   // Signature modal state
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
+  // how much was drawn: a tap or a dot is not a signature
+  const [drawnLength, setDrawnLength] = useState(0);
   const [noSignatureReason, setNoSignatureReason] = useState("");
   const [noSignatureChecked, setNoSignatureChecked] = useState(false);
+  // the equipment being serviced: the engineer fills in or corrects what the work order says about it
+  const [equipmentSheetVisible, setEquipmentSheetVisible] = useState(false);
+  const [equipmentForm, setEquipmentForm] = useState({ manufacturer: "", model: "", serialNumber: "" });
+  const [isEquipmentSaving, setIsEquipmentSaving] = useState(false);
+
+  const openEquipmentSheet = () => {
+    setEquipmentForm({
+      manufacturer: data?.equipment?.manufacturer ?? "",
+      model: data?.equipment?.model ?? "",
+      serialNumber: data?.equipment?.serialNumber ?? "",
+    });
+    setEquipmentSheetVisible(true);
+  };
+
+  const saveEquipment = async () => {
+    try {
+      setIsEquipmentSaving(true);
+      await appointments.update(id, {
+        // what else the equipment holds (name, notes...) is kept
+        equipment: {
+          ...(data?.equipment ?? {}),
+          manufacturer: equipmentForm.manufacturer.trim(),
+          model: equipmentForm.model.trim(),
+          serialNumber: equipmentForm.serialNumber.trim(),
+        },
+      } as Partial<WorkOrder>);
+      await queryClient.invalidateQueries({ queryKey: ["appointment", id] });
+      setEquipmentSheetVisible(false);
+    } catch (error) {
+      console.error("Failed to save equipment:", error);
+      Alert.alert(t("errorTitle"), t("errorGeneral"), [{ text: t("sharedOk") }]);
+    } finally {
+      setIsEquipmentSaving(false);
+    }
+  };
+
+  // what the field user writes about the job (the "Observations" area of the service sheet)
+  const [observations, setObservations] = useState("");
+  // someone else signs when the person who asked for the work is not there
+  const [signedByOther, setSignedByOther] = useState(false);
+  const [signedByName, setSignedByName] = useState("");
+  // the sheet scrolls, except while a signature is being drawn
+  const [sheetScrollEnabled, setSheetScrollEnabled] = useState(true);
   const [isSignatureSaving, setIsSignatureSaving] = useState(false);
   const signatureRef = useRef<any>(null);
 
@@ -74,6 +128,9 @@ const AppointmentDetails = () => {
         signedAt?: Date;
         noSignatureReason?: string;
         signatureUrl?: string | null;
+        notes?: string;
+        signedByOther?: boolean;
+        signedByName?: string;
       };
     }) => {
       // Replace with your actual API call
@@ -112,9 +169,11 @@ const AppointmentDetails = () => {
       setIsSignatureSaving(true);
 
       let signatureUrl = "";
+      // a dot or a tap is not a signature, even when the pad holds one
+      const signed = !!signature && signature !== "pending" && drawnLength >= MIN_SIGNATURE_LENGTH;
 
       // If signature is provided, save it
-      if (signature && signature !== "pending") {
+      if (signed) {
         // The signature is attached to the work order (a ticket) on the server
         signatureUrl = await storageService.uploadSignature(id, actualSignature);
         console.log("Signature uploaded successfully:", signatureUrl);
@@ -130,10 +189,14 @@ const AppointmentDetails = () => {
           statusData: {
             completed: true,
             status: "completed",
-            signatureProvided: !!signature && signature !== "pending",
+            signatureProvided: signed,
             noSignatureReason:
               !signature || signature === "pending" ? noSignatureReason : "",
             signatureUrl: signatureUrl || null,
+            notes: observations.trim(),
+            // someone else only counts when somebody did sign
+            signedByOther: signed && signedByOther,
+            signedByName: signed && signedByOther ? signedByName.trim() : "",
             signedAt: new Date(),
           },
         });
@@ -172,14 +235,17 @@ const AppointmentDetails = () => {
       signatureRef.current.clearSignature();
     }
     setSignature(null);
+    setDrawnLength(0);
   };
 
   // Check if form is valid
   const isSignatureFormValid = () => {
     // Either signature is provided OR no signature checkbox is checked AND reason is provided
+    const hasSignature = !!signature && signature !== "pending" && drawnLength >= MIN_SIGNATURE_LENGTH;
+    // when somebody else signs, who they are has to be written down
+    if (hasSignature && signedByOther && signedByName.trim().length === 0) return false;
     return (
-      signature === "pending" ||
-      !!signature ||
+      hasSignature ||
       (noSignatureChecked && noSignatureReason.trim().length > 0)
     );
   };
@@ -219,8 +285,13 @@ const AppointmentDetails = () => {
     if (newStatus === "completed") {
       // Reset signature state
       setSignature(null);
+      setDrawnLength(0);
       setNoSignatureReason("");
       setNoSignatureChecked(false);
+      setSignedByOther(false);
+      setSignedByName("");
+      // what was already written is kept; otherwise the usual outcome is suggested
+      setObservations(data?.notes?.trim() || t("ObservationsDefault"));
       setSignatureModalVisible(true);
       return;
     }
@@ -315,13 +386,13 @@ const AppointmentDetails = () => {
             data.serviced === "remote"
               ? t("remote")
               : data?.branchName ?? "",
-          link: data.serviced === "location" && data?.location?.location ? `/(maps)/${id}` : false,
+          link: data.serviced === "location" && workOrderPoint ? `/(maps)/${id}` : false,
         },
         {
           id: "21",
           title: "EventType",
           icon: TablerIcons.IconTool,
-          value: t(data?.type),
+          value: data?.eventType ? t(data.eventType) : data?.type ? t(data.type) : "",
         },
         {
           id: "23",
@@ -390,18 +461,21 @@ const AppointmentDetails = () => {
           title: "equipment.Manufacturer",
           icon: TablerIcons.IconTrademark,
           value: data?.equipment?.manufacturer,
+          action: openEquipmentSheet,
         },
         {
           id: "6",
           title: "equipment.Model",
           icon: TablerIcons.IconBlocks,
           value: data?.equipment?.model,
+          action: openEquipmentSheet,
         },
         {
           id: "61",
           title: "equipment.SerialNumber",
           icon: TablerIcons.IconBarcode,
           value: data?.equipment?.serialNumber,
+          action: openEquipmentSheet,
         },
       ],
     },
@@ -475,8 +549,7 @@ const AppointmentDetails = () => {
               ? "bg-primary border-primary"
               : "border-muted-foreground/20"
           }`}
-          onPressOut={Platform.OS === 'android' ? () => onStatusChange("open") : undefined}
-          onPress={Platform.OS === 'ios' ? () => onStatusChange("open") : undefined}
+          onPress={() => onStatusChange("open")}
         >
           <View className="flex-col items-center">
             <ToggleIcon
@@ -501,8 +574,7 @@ const AppointmentDetails = () => {
               ? "bg-primary border-primary"
               : "border-muted-foreground/20"
           }`}
-          onPressOut={Platform.OS === 'android' ? () => onStatusChange("onHold") : undefined}
-          onPress={Platform.OS === 'ios' ? () => onStatusChange("onHold") : undefined}
+          onPress={() => onStatusChange("onHold")}
         >
           <View className="flex-col items-center">
             <ToggleIcon
@@ -527,8 +599,7 @@ const AppointmentDetails = () => {
               ? "bg-primary border-primary"
               : "border-muted-foreground/20"
           }`}
-          onPressOut={Platform.OS === 'android' ? () => onStatusChange("inProgress") : undefined}
-          onPress={Platform.OS === 'ios' ? () => onStatusChange("inProgress") : undefined}
+          onPress={() => onStatusChange("inProgress")}
         >
           <View className="flex-col items-center">
             <ToggleIcon
@@ -555,8 +626,7 @@ const AppointmentDetails = () => {
               ? "bg-primary border-primary"
               : "border-muted-foreground/20"
           }`}
-          onPressOut={Platform.OS === 'android' ? () => onStatusChange("completed") : undefined}
-          onPress={Platform.OS === 'ios' ? () => onStatusChange("completed") : undefined}
+          onPress={() => onStatusChange("completed")}
         >
           <View className="flex-col items-center">
             <ToggleIcon
@@ -585,20 +655,17 @@ const AppointmentDetails = () => {
             </Text>
             <View className="rounded-xl border border-muted-foreground/20 bg-card overflow-hidden shadow-sm">
               {section.data.map((item, itemIndex) => (
-                item.link ? (
+                item.link || item.action ? (
                   <View key={item.id}>
                   <TouchableOpacity
-                    onPressOut={Platform.OS === 'android' ? () =>
-                      router.push({
-                        pathname: item.link as string,
-                        params: item.params && { ...item.params },
-                      }) : undefined}
-                    onPress={Platform.OS === 'ios' ? () =>
-                      router.push({
-                        pathname: item.link as string,
-                        params: item.params && { ...item.params },
-                      }) : undefined}
-                    disabled={!item.link}
+                    onPress={() =>
+                      item.action
+                        ? item.action()
+                        : router.push({
+                            pathname: item.link as string,
+                            params: item.params && { ...item.params },
+                          })}
+                    disabled={!item.link && !item.action}
                     className="py-3 px-4 flex-row items-center"
                   >
                     {/* Icon at the left */}
@@ -628,6 +695,7 @@ const AppointmentDetails = () => {
 
                     {/* Arrow at the right if item is a link */}
                     {item.link && <Text className="text-gray-400 ml-2">›</Text>}
+                    {item.action && <ThemedIcon icon={TablerIcons.IconPencil} size={16} />}
                   </TouchableOpacity>
                   {itemIndex < section.data.length - 1 && (
                     <View className="h-px bg-muted-foreground/10 ml-12" />
@@ -670,6 +738,59 @@ const AppointmentDetails = () => {
           </View>
         ))}
       </View>
+      {/* Equipment sheet */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        statusBarTranslucent={true}
+        visible={equipmentSheetVisible}
+        onRequestClose={() => setEquipmentSheetVisible(false)}
+      >
+        <KeyboardAvoidingView behavior="padding" className="flex-1 justify-end bg-black/50">
+          <View className="bg-background rounded-t-3xl p-4" style={{ paddingBottom: insets.bottom + 24 }}>
+            <View className="flex-row justify-start items-center mb-2">
+              <TouchableOpacity onPress={() => setEquipmentSheetVisible(false)} className="p-2">
+                <ThemedIcon icon={TablerIcons.IconX} size={24} />
+              </TouchableOpacity>
+              <Text className="text-lg text-primary font-manrope-semibold">
+                {t("EquipmentInformation")}
+              </Text>
+            </View>
+            <Text className="text-sm text-muted-foreground mb-4">{t("EquipmentSheetHint")}</Text>
+            {(
+              [
+                ["manufacturer", "equipment.Manufacturer"],
+                ["model", "equipment.Model"],
+                ["serialNumber", "equipment.SerialNumber"],
+              ] as const
+            ).map(([field, label]) => (
+              <View key={field} className="mb-4">
+                <Text className="text-sm text-primary font-manrope-semibold mb-2">{t(label)}</Text>
+                <TextInput
+                  className="border border-muted-foreground/20 rounded-lg p-2 text-primary"
+                  value={equipmentForm[field]}
+                  onChangeText={(text) => setEquipmentForm((form) => ({ ...form, [field]: text }))}
+                  placeholder={t(label)}
+                  placeholderTextColor="#9ca3af"
+                  autoCapitalize={field === "serialNumber" ? "characters" : "words"}
+                />
+              </View>
+            ))}
+            <TouchableOpacity
+              onPress={saveEquipment}
+              disabled={isEquipmentSaving}
+              className="py-3 px-4 rounded-lg flex-row justify-center items-center mt-2 bg-primary-foreground"
+            >
+              {isEquipmentSaving ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Text className="text-primary font-manrope-semibold">{t("Save")}</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       {/* Signature Modal */}
       <Modal
         animationType="slide"
@@ -683,18 +804,14 @@ const AppointmentDetails = () => {
           setPendingStatus(null);
         }}
       >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-background rounded-t-3xl p-4 pb-8">
+        <KeyboardAvoidingView behavior="padding" className="flex-1 justify-end bg-black/50">
+          <View className="bg-background rounded-t-3xl p-4" style={{ maxHeight: "92%", paddingBottom: insets.bottom + 24 }}>
             <View className="flex-row justify-start items-center mb-4">
               <TouchableOpacity
-                onPressOut={Platform.OS === 'android' ? () => {
+                onPress={() => {
                   setSignatureModalVisible(false);
                   setPendingStatus(null);
-                } : undefined}
-                onPress={Platform.OS === 'ios' ? () => {
-                  setSignatureModalVisible(false);
-                  setPendingStatus(null);
-                } : undefined}
+                }}
                 className="p-2"
               >
                 <ThemedIcon icon={TablerIcons.IconX} size={24} />
@@ -702,6 +819,56 @@ const AppointmentDetails = () => {
               <Text className="text-lg text-primary font-manrope-semibold">
                 {t("signatureRequired")}
               </Text>
+            </View>
+
+            <ScrollView
+              scrollEnabled={sheetScrollEnabled}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+            {/* Observations: the "Observations" area of the service sheet */}
+            <View className="mb-4">
+              <Text className="text-sm text-primary font-manrope-semibold mb-2">
+                {t("Observations")}
+              </Text>
+              <TextInput
+                className="border border-muted-foreground/20 rounded-lg p-2 min-h-[80px] text-primary"
+                multiline
+                textAlignVertical="top"
+                value={observations}
+                onChangeText={setObservations}
+                placeholder={t("ObservationsDefault")}
+                placeholderTextColor="#9ca3af"
+              />
+            </View>
+
+            {/* Somebody else signs when the person who asked for the work is not there */}
+            <View className="mb-4">
+              <View className="flex-row items-center">
+                <Switch
+                  value={signedByOther}
+                  disabled={noSignatureChecked}
+                  onValueChange={setSignedByOther}
+                  trackColor={{ false: "#d1d5db", true: "#0F1729" }}
+                />
+                <Text className="ml-2 flex-1 text-primary font-manrope-semibold">
+                  {t("SignedByOther")}
+                </Text>
+              </View>
+              {signedByOther && !noSignatureChecked && (
+                <View className="mt-2">
+                  <Text className="text-sm text-muted-foreground mb-2">
+                    {t("SignedByOtherName")}
+                  </Text>
+                  <TextInput
+                    className="border border-muted-foreground/20 rounded-lg p-2 text-primary"
+                    value={signedByName}
+                    onChangeText={setSignedByName}
+                    placeholder={t("SignedByOtherNamePlaceholder")}
+                    placeholderTextColor="#9ca3af"
+                  />
+                </View>
+              )}
             </View>
 
             <Text className="text-sm text-muted-foreground mb-4">
@@ -713,8 +880,17 @@ const AppointmentDetails = () => {
               <SignatureCanvas
                 ref={signatureRef}
                 onOK={handleSignatureSave}
-                onBegin={() => setSignature("pending")}
-                onEnd={() => setSignature("completed")}
+                onBegin={() => {
+                  setSignature("pending");
+                  setSheetScrollEnabled(false);
+                }}
+                onEnd={() => {
+                  setSignature("completed");
+                  setSheetScrollEnabled(true);
+                  // ask the pad for what was drawn: onGetData measures it
+                  signatureRef.current?.getData();
+                }}
+                onGetData={(strokes: string) => setDrawnLength(signatureLength(strokes))}
                 descriptionText={t("SignHere")}
                 clearText={t("Clear")}
                 confirmText={t("Save")}
@@ -745,10 +921,13 @@ const AppointmentDetails = () => {
               />
             </View>
 
+            {signature === "completed" && drawnLength < MIN_SIGNATURE_LENGTH && (
+              <Text className="text-sm text-destructive mb-2">{t("SignatureTooShort")}</Text>
+            )}
+
             {/* Clear Button */}
             <TouchableOpacity
-              onPressOut={Platform.OS === 'android' ? handleClearSignature : undefined}
-              onPress={Platform.OS === 'ios' ? handleClearSignature : undefined}
+              onPress={handleClearSignature}
               className="py-2 px-4 border border-muted-foreground/20 rounded-lg self-start mb-4"
             >
               <Text className="text-primary font-manrope-semibold">
@@ -761,7 +940,10 @@ const AppointmentDetails = () => {
               <View className="flex-row items-center mb-2">
                 <Switch
                   value={noSignatureChecked}
-                  onValueChange={setNoSignatureChecked}
+                  onValueChange={(on) => {
+                    setNoSignatureChecked(on);
+                    if (on) setSignedByOther(false);
+                  }}
                   trackColor={{ false: "#d1d5db", true: "#0F1729" }}
                 />
                 <Text className="ml-2 text-primary font-manrope-semibold">
@@ -786,10 +968,11 @@ const AppointmentDetails = () => {
               )}
             </View>
 
+            </ScrollView>
+
             {/* Save Button */}
             <TouchableOpacity
-              onPressOut={Platform.OS === 'android' ? handleSave : undefined}
-              onPress={Platform.OS === 'ios' ? handleSave : undefined}
+              onPress={handleSave}
               disabled={!isSignatureFormValid() || isSignatureSaving}
               className={`py-3 px-4 rounded-lg flex-row justify-center items-center mt-4 ${
                 isSignatureFormValid() ? "bg-primary-foreground" : "bg-primary-foreground"
@@ -804,7 +987,7 @@ const AppointmentDetails = () => {
               )}
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
       </SafeAreaView>
     </ScrollView>

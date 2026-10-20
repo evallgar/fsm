@@ -153,6 +153,10 @@ export interface WorkOrder {
     signatureProvided?: boolean;
     signatureUrl?: string;
     noSignatureReason?: string;
+    /** someone other than the person who asked for the work signed it (that person was not there) */
+    signedByOther?: boolean;
+    /** the name of that other person */
+    signedByName?: string;
     signedAt?: FirestoreTimestamp | Date;
     
     // Other fields

@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { withDangerousMod, withProjectBuildGradle } = require("expo/config-plugins");
+const { withDangerousMod, withGradleProperties, withProjectBuildGradle } = require("expo/config-plugins");
 
 /**
  * react-native-traccar-client-sdk is built with a newer Kotlin than React Native pins: the host build has to skip the
@@ -19,13 +19,26 @@ allprojects {
 }
 `;
 
+/**
+ * The SDK's Android library needs compileSdk 37 (set in app.json through expo-build-properties), one more than the
+ * Android Gradle plugin of this React Native version has been tested with; this tells it to go ahead without a warning
+ * turning into an error.
+ */
+const withCompileSdk = (config) =>
+  withGradleProperties(config, (cfg) => {
+    if (!cfg.modResults.some((p) => p.type === "property" && p.key === "android.suppressUnsupportedCompileSdk")) {
+      cfg.modResults.push({ type: "property", key: "android.suppressUnsupportedCompileSdk", value: "37" });
+    }
+    return cfg;
+  });
+
 const withAndroid = (config) =>
-  withProjectBuildGradle(config, (cfg) => {
+  withCompileSdk(withProjectBuildGradle(config, (cfg) => {
     if (cfg.modResults.language === "groovy" && !cfg.modResults.contents.includes(MARK)) {
       cfg.modResults.contents += BLOCK;
     }
     return cfg;
-  });
+  }));
 
 /**
  * The pod lists everything under ios/ as a source file, headers inside the prebuilt TraccarClientSDK.xcframework

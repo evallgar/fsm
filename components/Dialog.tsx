@@ -44,8 +44,7 @@ function DialogContent({
     >
       <TouchableOpacity
         className="w-full h-full"
-        onPressOut={Platform.OS === 'android' ? () => setOpen(false) : undefined}
-        onPress={Platform.OS === 'ios' ? () => setOpen(false) : undefined}
+        onPress={() => setOpen(false)}
       >
         <View className="flex flex-1 justify-center items-center bg-black/75">
           <TouchableOpacity

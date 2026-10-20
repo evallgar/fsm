@@ -191,7 +191,7 @@ export default function WorkOrderResults() {
   
   return (
     <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior="padding"
       className="flex-1"
     >
       <SafeAreaView className="flex-1 bg-background">
@@ -225,8 +225,7 @@ export default function WorkOrderResults() {
             
             <View className="flex-row mb-4 gap-2">
             <TouchableOpacity 
-                onPressOut={Platform.OS === 'android' ? () => takePicture() : undefined}
-                onPress={Platform.OS === 'ios' ? () => takePicture() : undefined}
+                onPress={() => takePicture()}
                 className="flex-row items-center bg-primary rounded-md py-2 px-4"
               >
                 <ToggleIcon icon={IconCamera} size={16} active={true} />
@@ -234,8 +233,7 @@ export default function WorkOrderResults() {
               </TouchableOpacity>
               
               <TouchableOpacity 
-                onPressOut={Platform.OS === 'android' ? () => pickImage() : undefined}
-                onPress={Platform.OS === 'ios' ? () => pickImage() : undefined}
+                onPress={() => pickImage()}
                 className="flex-row items-center bg-card border border-muted-foreground/20 rounded-md py-2 px-4"
               >
                 <ThemedIcon icon={IconPlus} size={16} />
@@ -254,8 +252,7 @@ export default function WorkOrderResults() {
                   renderItem={({ item, index }) => (
                     <View className="mr-4 rounded-xl overflow-hidden border border-muted-foreground/20 bg-card shadow-sm">
                       <TouchableOpacity
-                        onPressOut={Platform.OS === 'android' ? () => setFullscreenImage(item.uri) : undefined}
-                        onPress={Platform.OS === 'ios' ? () => setFullscreenImage(item.uri) : undefined}
+                        onPress={() => setFullscreenImage(item.uri)}
                         activeOpacity={0.9}
                       >
                         <Image 
@@ -264,8 +261,7 @@ export default function WorkOrderResults() {
                         />
                       </TouchableOpacity>
                       <TouchableOpacity 
-                        onPressOut={Platform.OS === 'android' ? () => removeImage(index) : undefined}
-                        onPress={Platform.OS === 'ios' ? () => removeImage(index) : undefined}
+                        onPress={() => removeImage(index)}
                         className="absolute top-2 right-2 bg-black/50 rounded-full p-1"
                       >
                         <IconTrash size={16} color="#fff" />
@@ -286,8 +282,7 @@ export default function WorkOrderResults() {
         {/* Save button with activity indicator */}
         <View className="bottom-4 left-0 right-0 p-4 bg-background border-t border-muted-foreground/10">
           <TouchableOpacity 
-            onPressOut={Platform.OS === 'android' ? () => saveResults() : undefined}
-            onPress={Platform.OS === 'ios' ? () => saveResults() : undefined}
+            onPress={() => saveResults()}
             disabled={isSaving}
             className="bg-primary py-3 rounded-md flex-row h-16 justify-center items-center"
             style={{ opacity: isSaving ? 0.7 : 1 }}
@@ -312,13 +307,11 @@ export default function WorkOrderResults() {
         <TouchableOpacity 
           activeOpacity={1} 
           style={{ flex: 1, backgroundColor: 'black' }}
-          onPressOut={Platform.OS === 'android' ? () => setFullscreenImage(null) : undefined}
-          onPress={Platform.OS === 'ios' ? () => setFullscreenImage(null) : undefined}
+          onPress={() => setFullscreenImage(null)}
         >
           <SafeAreaView style={{ flex: 1 }}>
             <TouchableOpacity
-              onPressOut={Platform.OS === 'android' ? () => setFullscreenImage(null) : undefined}
-              onPress={Platform.OS === 'ios' ? () => setFullscreenImage(null) : undefined}
+              onPress={() => setFullscreenImage(null)}
               style={{ 
                 position: 'absolute', 
                 top: 40, 
@@ -336,18 +329,12 @@ export default function WorkOrderResults() {
               {fullscreenImage && (
                 <TouchableOpacity
                   activeOpacity={1}
-                  onPressOut={Platform.OS === 'android' ? (e) => {
+                  onPress={(e) => {
                     // Prevent click from bubbling to parent
                     e.stopPropagation();
                     // Still allow tap to close
                     setFullscreenImage(null);
-                  } : undefined}
-                  onPress={Platform.OS === 'ios' ? (e) => {
-                    // Prevent click from bubbling to parent
-                    e.stopPropagation();
-                    // Still allow tap to close
-                    setFullscreenImage(null);
-                  } : undefined}
+                  }}
                 >
                   <Image
                     source={imageSource(fullscreenImage)}

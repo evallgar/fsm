@@ -193,7 +193,7 @@ const dayOf = (d: Date | null) => (d ? Timestamp.fromDate(new Date(d.getFullYear
 const ATTRIBUTE_KEYS = [
   "name", "subject", "user", "entityId", "departmentId", "serviced", "equipmentId", "equipment", "photoURL", "active",
   "customerName", "primaryContactName", "branchName", "isAllDay", "location", "eventType", "type", "findings", "results",
-  "measurements", "images", "notes", "materials", "signatureProvided", "signatureUrl", "noSignatureReason", "ownerId", "tags",
+  "measurements", "images", "notes", "materials", "signatureProvided", "signatureUrl", "noSignatureReason", "signedByOther", "signedByName", "ownerId", "tags",
 ] as const;
 
 export function toWorkOrder(t: Ticket, ctx: CompanyContext): WorkOrder {
@@ -251,6 +251,8 @@ export function toWorkOrder(t: Ticket, ctx: CompanyContext): WorkOrder {
     signatureProvided: attr(a, "signatureProvided", undefined),
     signatureUrl: attr(a, "signatureUrl", undefined),
     noSignatureReason: attr(a, "noSignatureReason", undefined),
+    signedByOther: attr(a, "signedByOther", undefined),
+    signedByName: attr(a, "signedByName", undefined),
     signedAt: toDate(a.signedAt) ?? undefined,
     ownerId: attr(a, "ownerId", ""),
     tags: attr(a, "tags", []),

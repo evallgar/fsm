@@ -51,8 +51,7 @@ function RadioGroupItem({
 
   return (
     <TouchableOpacity
-      onPressOut={Platform.OS === 'android' ? () => setValue(value) : undefined}
-      onPress={Platform.OS === 'ios' ? () => setValue(value) : undefined}
+      onPress={() => setValue(value)}
       className={cn('flex flex-row items-center gap-2', className)}
       {...props}
     >
@@ -82,8 +81,7 @@ function RadioGroupLabel({ value, className, ...props }: RadioGroupLabelProps) {
   return (
     <TouchableOpacity
       className={className}
-      onPressOut={Platform.OS === 'android' ? () => setValue(value) : undefined}
-      onPress={Platform.OS === 'ios' ? () => setValue(value) : undefined}
+      onPress={() => setValue(value)}
       {...props}
     />
   );

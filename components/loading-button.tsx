@@ -21,8 +21,7 @@ const LoadingButton = ({
       <Pressable
         style={[styles.button, style]}
         className="bg-primary w-full max-w-[300px] py-3 rounded-lg active:bg-primary"
-        onPress={() => Platform.OS === 'ios' ? onPress() : null}
-        onPressOut={() => Platform.OS === 'android' ? onPress() : null}
+        onPress={() => onPress()}
         android_ripple={{ color: '#ccc', radius: 10 }}
         disabled={loading}
       >

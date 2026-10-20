@@ -206,8 +206,7 @@ export default function WorkOrderSpareParts() {
         <Button
           label={t("GoBack")}
           variant="secondary"
-          onPressOut={Platform.OS === 'android' ? () => router.back() : undefined}
-          onPress={Platform.OS === 'ios' ? () => router.back() : undefined}
+          onPress={() => router.back()}
         />
       </SafeAreaView>
     );
@@ -276,8 +275,7 @@ export default function WorkOrderSpareParts() {
 
                         {/* Delete button */}
                         <TouchableOpacity
-                          onPressOut={Platform.OS === 'android' ? () => removeMaterial(material.id) : undefined}
-                          onPress={Platform.OS === 'ios' ? () => removeMaterial(material.id) : undefined}
+                          onPress={() => removeMaterial(material.id)}
                           className="p-2"
                         >
                           <ThemedIcon
@@ -306,8 +304,7 @@ export default function WorkOrderSpareParts() {
           {/* Add Material Button */}
           <View className="mb-4">
             <TouchableOpacity
-              onPressOut={Platform.OS === 'android' ? () => setModalVisible(true) : undefined}
-              onPress={Platform.OS === 'ios' ? () => setModalVisible(true) : undefined}
+              onPress={() => setModalVisible(true)}
               disabled={updateAppointmentMutation.isPending}
               className="bg-card py-3 rounded-md flex-row justify-center items-center"
               style={{ opacity: updateAppointmentMutation.isPending ? 0.7 : 1 }}
@@ -328,8 +325,7 @@ export default function WorkOrderSpareParts() {
           {/* Save button with activity indicator */}
           <View className="bottom-4 left-0 right-0 p-4 bg-background border-t border-muted-foreground/10">
             <TouchableOpacity
-              onPressOut={Platform.OS === 'android' ? () => saveMaterials() : undefined}
-              onPress={Platform.OS === 'ios' ? () => saveMaterials() : undefined}
+              onPress={() => saveMaterials()}
               disabled={updateAppointmentMutation.isPending}
               className="bg-primary py-3 rounded-md flex-row justify-center items-center"
               style={{ opacity: updateAppointmentMutation.isPending ? 0.7 : 1 }}
@@ -357,19 +353,16 @@ export default function WorkOrderSpareParts() {
         }}
       >
         <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
       style={styles.container}>
-      <TouchableWithoutFeedback onPressOut={Platform.OS === 'android' ? () => Keyboard.dismiss : undefined} onPress={Platform.OS === 'ios' ? () => Keyboard.dismiss : undefined}>
+      <TouchableWithoutFeedback  onPress={() => Keyboard.dismiss}>
         <View className="flex-1 justify-end bg-black/50">
           <View className="bg-background rounded-t-3xl p-4 pb-8">
             <View className="flex-row justify-start items-center mb-4">
               <TouchableOpacity
-                onPressOut={Platform.OS === 'android' ? () => {
+                onPress={() => {
                   setModalVisible(false);
-                } : undefined}
-                onPress={Platform.OS === 'ios' ? () => {
-                  setModalVisible(false);
-                } : undefined}
+                }}
                 className="p-2"
               >
                 <ThemedIcon icon={IconX} size={24} />
@@ -437,16 +430,11 @@ export default function WorkOrderSpareParts() {
                 {t("ProvidedByUser")}
               </Text>
               <TouchableOpacity
-                onPressOut={Platform.OS === 'android' ? () =>
+                onPress={() =>
                   setNewMaterial({
                     ...newMaterial,
                     providedByUser: !newMaterial.providedByUser,
-                  }) : undefined}
-                onPress={Platform.OS === 'ios' ? () =>
-                  setNewMaterial({
-                    ...newMaterial,
-                    providedByUser: !newMaterial.providedByUser,
-                  }) : undefined}
+                  })}
               >
                 <View
                   className={`w-6 h-6 rounded ${
@@ -467,16 +455,11 @@ export default function WorkOrderSpareParts() {
                 {t("ProvidedByCustomer")}
               </Text>
               <TouchableOpacity
-                onPressOut={Platform.OS === 'android' ? () =>
+                onPress={() =>
                   setNewMaterial({
                     ...newMaterial,
                     providedByCustomer: !newMaterial.providedByCustomer,
-                  }) : undefined}
-                onPress={Platform.OS === 'ios' ? () =>
-                  setNewMaterial({
-                    ...newMaterial,
-                    providedByCustomer: !newMaterial.providedByCustomer,
-                  }) : undefined}
+                  })}
               >
                 <View
                   className={`w-6 h-6 rounded ${
@@ -497,15 +480,13 @@ export default function WorkOrderSpareParts() {
                 label={t("sharedCancel")}
                 variant="secondary"
                 className="flex-1 mr-2"
-                onPressOut={Platform.OS === 'android' ? () => setModalVisible(false) : undefined}
-                onPress={Platform.OS === 'ios' ? () => setModalVisible(false) : undefined}
+                onPress={() => setModalVisible(false)}
               />
               <Button
                 label={t("sharedAdd")}
                 variant="default"
                 className="flex-1 ml-2"
-                onPressOut={Platform.OS === 'android' ? () => addMaterial() : undefined}
-                onPress={Platform.OS === 'ios' ? () => addMaterial() : undefined}
+                onPress={() => addMaterial()}
               />
             </View>
           </View>

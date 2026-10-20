@@ -108,8 +108,7 @@ export default function RegisterLocation() {
         <Button
           variant="default"
           label={registering ? t("Processing...") : actionText}
-          onPressOut={Platform.OS === 'android' ? handleRegisterLocation : undefined}
-          onPress={Platform.OS === 'ios' ? handleRegisterLocation : undefined}
+          onPress={handleRegisterLocation}
           disabled={registering}
         />
       )}
