@@ -27,7 +27,7 @@ function Checkbox({
       className={cn('flex flex-row items-center gap-2', className)}
       {...props}
     >
-      <TouchableOpacity onPressOut={Platform.OS === 'android' ? toggleCheckbox : undefined} onPress={Platform.OS === 'ios' ? toggleCheckbox : undefined}>
+      <TouchableOpacity  onPress={toggleCheckbox}>
         <View
           className={cn(
             'w-4 h-4 border border-gray-700 rounded bg-background flex justify-center items-center',

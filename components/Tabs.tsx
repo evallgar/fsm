@@ -59,8 +59,7 @@ function TabsTrigger({
         'bg-foreground': activeTab === value,
         className,
       })}
-      onPressOut={Platform.OS === 'android' ? () => setActiveTab(value) : undefined}
-      onPress={Platform.OS === 'ios' ? () => setActiveTab(value) : undefined}
+      onPress={() => setActiveTab(value)}
       {...props}
     >
       <Text

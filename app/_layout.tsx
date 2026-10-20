@@ -185,7 +185,7 @@ const InitialLayout = () => {
           sheetInitialDetentIndex: 0,
           sheetGrabberVisible: true,
           headerLeft: () => (
-            <Pressable onPressOut={() => Platform.OS === 'android' ? router.dismiss() : null} onPress={() => Platform.OS === 'ios' ? router.dismiss() : null}> 
+            <Pressable  onPress={() => router.dismiss()}> 
               <ThemedIcon icon={IconX} size={24} />
             </Pressable>
           ),

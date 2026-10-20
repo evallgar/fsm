@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Text, TextInput, View, Pressable, ActivityIndicator, StyleSheet, Platform } from "react-native";
+import { Text, TextInput, View, Pressable, ActivityIndicator, StyleSheet, Platform, KeyboardAvoidingView } from "react-native";
 import { useState } from "react";
 import { useSession } from "@/context/auth-context";
 import LoadingButton from "@/components/loading-button";
@@ -77,7 +77,7 @@ export default function SignIn() {
   // ============================================================================
 
   return (
-    <View className="flex-1 justify-center items-center p-4">
+    <KeyboardAvoidingView behavior="padding" className="flex-1 justify-center items-center p-4">
       {/* Welcome Section */}
       <View className="items-center mb-8">
         <Text className="text-2xl font-manrope-bold tracking-tighter text-primary mb-2">
@@ -119,8 +119,7 @@ export default function SignIn() {
               className="w-full p-3 border border-muted-foreground/30 rounded-lg text-primary bg-card pr-10"
             />
             <Pressable 
-              onPress={() => Platform.OS === 'ios' ? setShowPassword(!showPassword) : null}
-              onPressOut={() => Platform.OS === 'android' ? setShowPassword(!showPassword) : null}
+              onPress={() => setShowPassword(!showPassword)}
               className="absolute right-3"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -131,8 +130,7 @@ export default function SignIn() {
           </View>
           {/* Reset password, as in the webapp */}
           <Pressable
-            onPress={() => (Platform.OS === "ios" ? setForgotOpen(true) : null)}
-            onPressOut={() => (Platform.OS === "android" ? setForgotOpen(true) : null)}
+            onPress={() => setForgotOpen(true)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             className="mt-2 self-end"
           >
@@ -180,7 +178,7 @@ export default function SignIn() {
           </Pressable>
         </Link>
       </View> */}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

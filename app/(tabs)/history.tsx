@@ -49,8 +49,7 @@ const History = () => {
           </Text>
           <TouchableOpacity
             className="bg-primary px-4 py-2 rounded-md"
-            onPressOut={Platform.OS === 'android' ? () => completedAppointmentsQuery.refetch() : undefined}
-            onPress={Platform.OS === 'ios' ? () => completedAppointmentsQuery.refetch() : undefined}
+            onPress={() => completedAppointmentsQuery.refetch()}
           >
             <Text className="text-primary-foreground">{t("TryAgain")}</Text>
           </TouchableOpacity>
@@ -70,18 +69,11 @@ const History = () => {
                   <View key={item.id}>
                     <TouchableOpacity
                       className="py-3 px-4 flex-row items-center"
-                      onPressOut={Platform.OS === 'android' ? () =>
+                      onPress={() =>
                         router.push({
                           pathname: `/(details)/${item.id}`,
                           params: { returnTo: "history" },
-                        })
-                      : undefined}
-                      onPress={Platform.OS === 'ios' ? () =>
-                        router.push({
-                          pathname: `/(details)/${item.id}`,
-                          params: { returnTo: "history" },
-                        })
-                      : undefined}
+                        })}
                       >
                       {/* Icon based on serviced type */}
                       <View className="w-8 justify-center items-center">

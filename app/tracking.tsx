@@ -102,13 +102,11 @@ export default function Tracking() {
     }
   };
 
-  const press = (action: () => void) => ({
-    onPress: () => (Platform.OS === "ios" ? action() : null),
-    onPressOut: () => (Platform.OS === "android" ? action() : null),
-  });
+  // onPress, on both platforms: it is not fired when the touch turns into a scroll (onPressOut is)
+  const press = (action: () => void) => ({ onPress: () => action() });
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 bg-background">
+    <KeyboardAvoidingView behavior="padding" className="flex-1 bg-background">
       <ScrollView className="flex-1" contentContainerClassName="px-4 pt-4 pb-32" keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic">
         <Section title={t("trackingStatus")}>
           <View className="flex-row items-center justify-between">

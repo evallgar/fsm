@@ -51,8 +51,7 @@ export function SheetFrame({ title, visible, onClose, children }: { title: strin
           <Pressable
             accessibilityLabel={t("legalClose")}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            onPress={() => (Platform.OS === "ios" ? onClose() : null)}
-            onPressOut={() => (Platform.OS === "android" ? onClose() : null)}
+            onPress={() => onClose()}
           >
             <ThemedIcon icon={IconX} size={22} />
           </Pressable>

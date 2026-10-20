@@ -37,14 +37,12 @@ export default function ForgotPasswordSheet({ visible, onClose, initialEmail = "
     }
   };
 
-  const press = (action: () => void) => ({
-    onPress: () => (Platform.OS === "ios" ? action() : null),
-    onPressOut: () => (Platform.OS === "android" ? action() : null),
-  });
+  // onPress, on both platforms: it is not fired when the touch turns into a scroll (onPressOut is)
+  const press = (action: () => void) => ({ onPress: () => action() });
 
   return (
     <SheetFrame title={t("forgotPasswordTitle")} visible={visible} onClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1">
+      <KeyboardAvoidingView behavior="padding" className="flex-1">
         <View className="gap-5 px-4 py-6">
           {sent ? (
             <>

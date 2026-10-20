@@ -95,8 +95,7 @@ export default function WorkOrderMethods() {
         className="w-full mx-4"  
         renderItem={({ item }) => (
           <Pressable 
-            onPressOut={Platform.OS === 'android' ? () => handleProcedurePress(item) : undefined}
-            onPress={Platform.OS === 'ios' ? () => handleProcedurePress(item) : undefined}
+            onPress={() => handleProcedurePress(item)}
             className="flex-row items-center py-4 border-b border-muted-foreground/20"
           >
             {/* Icon based on severity */}

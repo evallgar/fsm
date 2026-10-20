@@ -17,9 +17,10 @@ import {
   ActivityIndicator,
   Alert,
   Keyboard,
+  KeyboardAvoidingView,
   TouchableWithoutFeedback 
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   IconUser,
   IconMail,
@@ -71,6 +72,8 @@ const Profile = () => {
   // ============================================================================
   const { signOut, user } = useSession();
   const { i18n, t } = useTranslation();
+  // the password sheet reaches the bottom of the screen, under the system navigation bar
+  const insets = useSafeAreaInsets();
   const currentLanguage = i18n.language;
   const colorScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(colorScheme === "dark");
@@ -243,8 +246,7 @@ const Profile = () => {
               {flags.map(({ lang, name }) => (
                 <TouchableOpacity
                   key={name}
-                  onPressOut={Platform.OS === 'android' ? () => changeLanguage(lang) : undefined}
-                  onPress={Platform.OS === 'ios' ? () => changeLanguage(lang) : undefined}
+                  onPress={() => changeLanguage(lang)}
                   className={`px-3 py-1 mx-1 rounded-full ${currentLanguage === lang ? "bg-primary" : "bg-muted"}`}
                 >
                   <Text className={`${currentLanguage === lang ? "text-primary-foreground" : "text-muted-foreground"} font-medium`}>
@@ -323,7 +325,7 @@ const Profile = () => {
               </View>
               <TouchableOpacity 
                 className="absolute bottom-0 right-0 bg-primary rounded-full p-1.5"
-                onPressOut={() => console.log('Change avatar')}
+                onPress={() => console.log('Change avatar')}
               >
                 <ThemedIcon icon={IconCamera} size={14} />
               </TouchableOpacity>
@@ -352,8 +354,7 @@ const Profile = () => {
                 {section.data.map((item, itemIndex) => (
                   <View key={item.id}>
                     <TouchableOpacity
-                      onPressOut={Platform.OS === 'android' ? item.action : undefined}
-                      onPress={Platform.OS === 'ios' ? item.action : undefined}
+                      onPress={item.action}
                       disabled={!item.action && !item.toggle}
                       className="py-3 px-4 flex-row items-center"
                     >
@@ -403,13 +404,12 @@ const Profile = () => {
         visible={passwordModalVisible}
         onRequestClose={closePasswordModal}
       >
-        <TouchableWithoutFeedback onPressOut={Platform.OS === 'android' ? Keyboard.dismiss : undefined} onPress={Platform.OS === 'ios' ? Keyboard.dismiss : undefined}>
-          <View className="flex-1 justify-end bg-black/50">
-            <View className="bg-background rounded-t-3xl p-6 pb-8">
+        <TouchableWithoutFeedback  onPress={Keyboard.dismiss}>
+          <KeyboardAvoidingView behavior="padding" className="flex-1 justify-end bg-black/50">
+            <View className="bg-background rounded-t-3xl p-6" style={{ paddingBottom: insets.bottom + 24 }}>
               <View className="flex-row justify-start items-center mb-6">
               <TouchableOpacity
-                  onPressOut={Platform.OS === 'android' ? closePasswordModal : undefined}
-                  onPress={Platform.OS === 'ios' ? closePasswordModal : undefined}
+                  onPress={closePasswordModal}
                   className="p-2"
                 >
                   <ThemedIcon icon={IconX} size={20} />
@@ -444,8 +444,7 @@ const Profile = () => {
                     onSubmitEditing={() => confirmPasswordRef.current?.focus()}
                   />
                   <TouchableOpacity 
-                    onPressOut={Platform.OS === 'android' ? () => setShowPassword(!showPassword) : undefined}
-                    onPress={Platform.OS === 'ios' ? () => setShowPassword(!showPassword) : undefined}
+                    onPress={() => setShowPassword(!showPassword)}
                     className="px-4"
                   >
                     <ThemedIcon icon={showPassword ? IconEyeOff : IconEye} size={20} />
@@ -476,8 +475,7 @@ const Profile = () => {
               
               {/* Submit Button */}
               <TouchableOpacity
-                onPressOut={Platform.OS === 'android' ? handlePasswordSubmit : undefined}
-                onPress={Platform.OS === 'ios' ? handlePasswordSubmit : undefined}
+                onPress={handlePasswordSubmit}
                 disabled={isSubmitting}
                 className={`py-3 px-4 rounded-lg ${isSubmitting ? 'bg-primary/70' : 'bg-primary'} flex-row justify-center items-center`}
               >
@@ -490,7 +488,7 @@ const Profile = () => {
                 )}
               </TouchableOpacity>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
       </Modal>
       <LegalSheet kind={legal} onClose={() => setLegal(null)} />

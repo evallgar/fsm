@@ -286,16 +286,9 @@ const Index = () => {
                         ).map((item, itemIndex) => (
                           <View key={item.id}>
                             <Pressable
-                              onPress={() => Platform.OS === 'ios' ? 
-                                router.push({
+                              onPress={() => router.push({
                                   pathname: `/(details)/${item.id}`,
-                                })
-                              : null}
-                              onPressOut={() => Platform.OS === 'android' ? 
-                                router.push({
-                                  pathname: `/(details)/${item.id}`,
-                                })
-                              : null}
+                                })}
                               className="py-3 px-4 flex-row items-center"
                             >
                               {/* Icon based on serviced type */}
@@ -413,16 +406,9 @@ const Index = () => {
                         ).map((item, itemIndex) => (
                           <View key={item.id}>
                             <Pressable
-                              onPress={() => Platform.OS === 'ios' ? 
-                                router.push({
+                              onPress={() => router.push({
                                   pathname: `/(details)/${item.id}`,
-                                })
-                              : null}
-                              onPressOut={() => Platform.OS === 'android' ? 
-                                router.push({
-                                  pathname: `/(details)/${item.id}`,
-                                })
-                              : null}
+                                })}
                               className="py-3 px-4 flex-row items-center"
                             >
                               {/* Icon based on serviced type */}
