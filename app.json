@@ -52,7 +52,8 @@
           "apiKey": "AIzaSyDSjzgvcemQokfdzQq03rjryLfjHvQMVVk"
         }
       },
-      "package": "com.apps.companion.fsm"
+      "package": "com.apps.companion.fsm",
+      "versionCode": 8
     },
     "web": {
       "favicon": "./assets/favicon.png",
